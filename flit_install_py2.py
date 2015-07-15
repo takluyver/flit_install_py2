@@ -132,7 +132,7 @@ class Installer(object):
                     module=module,
                     func=func
                 ))
-            script_file.chmod(0o755)
+            os.chmod(script_file, 0o755)
 
             if sys.platform == 'win32':
                 cmd_file = script_file.with_suffix('.cmd')
@@ -155,7 +155,7 @@ class Installer(object):
         if not requirements:
             return
 
-        pip_requirements = [
+        requirements = [
             _requires_dist_to_pip_requirement(req_d)
             for req_d  in requirements
         ]
@@ -201,8 +201,9 @@ class Installer(object):
         else:
             shutil.copy2(src, dst)
 
-        scripts = self.cfg['scripts']
-        self.install_scripts(scripts, dirs['scripts'])
+        if 'scripts' in self.cfg:
+            scripts = self.cfg['scripts']
+            self.install_scripts(scripts, dirs['scripts'])
 
 def main():
     ap = argparse.ArgumentParser('flit-install-py2', version=__version__)

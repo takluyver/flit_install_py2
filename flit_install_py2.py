@@ -199,7 +199,7 @@ class Installer(object):
 
         src = self.module.path
         if self.symlink:
-            os.symlink(str(os.path.realpath(self.module.path)), dst)
+            os.symlink(os.path.realpath(self.module.path), dst)
         elif os.path.isdir(self.module.path):
             shutil.copytree(src, dst)
         else:

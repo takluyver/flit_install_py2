@@ -176,8 +176,15 @@ class Installer(object):
         """Install a module/package into site-packages, and create its scripts.
         """
         dirs = get_dirs(user=self.user)
-        os.makedirs(dirs['purelib'], exist_ok=True)
-        os.makedirs(dirs['scripts'], exist_ok=True)
+        try:
+            os.makedirs(dirs['purelib'])
+        except OSError:
+            pass
+
+        try:
+            os.makedirs(dirs['scripts'])
+        except OSError:
+            pass
 
         dst = os.path.join(dirs['purelib'], os.path.basename(self.module.path))
         if os.path.lexists(dst):

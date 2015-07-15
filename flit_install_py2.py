@@ -109,7 +109,7 @@ class RootInstallError(Exception):
 
 
 class Installer(object):
-    def __init__(self, ini_path, user=None):
+    def __init__(self, ini_path, user=None, symlink=False):
         self.cfg = configparser.ConfigParser()
         self.cfg.read([ini_path])
         self.module = Module(self.cfg.get('metadata', 'module'))
@@ -121,6 +121,8 @@ class Installer(object):
 
         if (os.getuid() == 0) and (not os.environ.get('FLIT_ROOT_INSTALL')):
             raise RootInstallError
+
+        self.symlink = symlink
 
     def install_scripts(self, script_defs, scripts_dir):
         for name, ep in script_defs.items():
@@ -196,7 +198,9 @@ class Installer(object):
         self.install_requirements()
 
         src = self.module.path
-        if os.path.isdir(self.module.path):
+        if self.symlink:
+            os.symlink(os.path.realpath(self.module.path), dst)
+        elif os.path.isdir(self.module.path):
             shutil.copytree(src, dst)
         else:
             shutil.copy2(src, dst)
@@ -208,9 +212,10 @@ class Installer(object):
 def main():
     ap = argparse.ArgumentParser('flit-install-py2', version=__version__)
     ap.add_argument('-f', '--ini-file', default='flit.ini')
+    ap.add_argument('-s', '--symlink', action='store_true')
     opts = ap.parse_args()
 
-    Installer(opts.ini_file).install()
+    Installer(opts.ini_file, symlink=opts.symlink).install()
 
 if __name__ == '__main__':
     main()
